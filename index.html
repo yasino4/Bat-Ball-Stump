@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bat Ball Stump Game - 3D Edition</title>
+  <style>
+    /* ----------- BACKGROUND & GLOBAL STYLE ----------- */
+    body {
+      font-family: 'Poppins', sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      background-image: url('image_bat,ball,stump.jpg'); /* ✅ rename your image file */
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      color: white;
+    }
+
+    /* dark overlay to improve text readability */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: -1;
+    }
+
+    h1 {
+      color: #fff;
+      margin-top: 40px;
+      text-shadow: 2px 2px 5px rgba(0,0,0,0.6);
+    }
+
+    .choice-button {
+      margin: 20px 0;
+    }
+
+    .choice-btn {
+      border: none;
+      background: none;
+      cursor: pointer;
+      margin: 10px;
+      transition: transform 0.2s;
+    }
+
+    .choice-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .choice-btn img {
+      width: 100px;
+      height: 100px;
+      border-radius: 12px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+      transition: transform 0.3s ease;
+      background: white;
+    }
+
+    /* --- ANIMATIONS --- */
+    @keyframes batHit {
+      0% { transform: rotate(0deg); }
+      40% { transform: rotate(-40deg); }
+      100% { transform: rotate(0deg); }
+    }
+
+    @keyframes ballSpin {
+      0% { transform: rotate(0deg) scale(1); }
+      50% { transform: rotate(360deg) scale(1.2); }
+      100% { transform: rotate(720deg) scale(1); }
+    }
+
+    @keyframes stumpFall {
+      0% { transform: rotate(0deg); }
+      50% { transform: rotate(-25deg); }
+      100% { transform: rotate(0deg); }
+    }
+
+    .animate-bat { animation: batHit 0.8s ease-in-out; }
+    .animate-ball { animation: ballSpin 0.8s ease-in-out; }
+    .animate-stump { animation: stumpFall 0.8s ease-in-out; }
+
+    /* --- Scoreboard --- */
+    #scoreboard {
+      background: rgba(255,255,255,0.8);
+      border-radius: 12px;
+      padding: 20px;
+      width: 320px;
+      margin: 30px auto;
+      box-shadow: 0 5px 12px rgba(0,0,0,0.3);
+      color: #0d47a1;
+    }
+
+    #result {
+      font-size: 22px;
+      margin-top: 20px;
+      font-weight: 600;
+    }
+
+    .winner { color: limegreen; }
+    .loser { color: red; }
+    .tie { color: gray; }
+
+    button.reset {
+      margin-top: 20px;
+      background: #0d47a1;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button.reset:hover {
+      background: #1976d2;
+    }
+  </style>
+</head>
+<body>
+  <h1>🏏 Bat Ball Stump - 3D Motion Edition</h1>
+
+  <div class="choice-button">
+    <button class="choice-btn" onclick="playGame('Bat')" id="batBtn">
+      <img src="image_bat.png" alt="Bat Image" class="choice-image">
+    </button>
+    <button class="choice-btn" onclick="playGame('Ball')" id="ballBtn">
+      <img src="image_ball.jpg" alt="Ball Image" class="choice-image">
+    </button>
+    <button class="choice-btn" onclick="playGame('Stump')" id="stumpBtn">
+      <img src="image_stump.jpg" alt="Stump Image" class="choice-image">
+    </button>
+  </div>
+
+  <div id="result"></div>
+  <div id="user-choice"></div>
+  <div id="computer-choice"></div>
+
+  <div id="scoreboard">
+    <h2>📊 Scoreboard</h2>
+    <p>Total Matches: <span id="total">0</span></p>
+    <p>Wins: <span id="wins">0</span></p>
+    <p>Losses: <span id="losses">0</span></p>
+    <p>Ties: <span id="ties">0</span></p>
+  </div>
+
+  <button class="reset" onclick="resetGame()">Reset Game</button>
+
+  <script>
+    let totalMatches = 0, wins = 0, losses = 0, ties = 0;
+
+    function playGame(userChoice) {
+      const choices = ['Bat', 'Ball', 'Stump'];
+      const computerChoice = choices[Math.floor(Math.random() * 3)];
+      let result = '';
+
+      if (userChoice === computerChoice) {
+        result = "It's a Tie!";
+        ties++;
+      } else if (
+        (userChoice === 'Bat' && computerChoice === 'Ball') ||
+        (userChoice === 'Ball' && computerChoice === 'Stump') ||
+        (userChoice === 'Stump' && computerChoice === 'Bat')
+      ) {
+        result = 'You Won!';
+        wins++;
+        animateWinner(userChoice);
+      } else {
+        result = 'You Lost!';
+        losses++;
+        animateWinner(computerChoice);
+      }
+
+      totalMatches++;
+      document.getElementById('user-choice').innerHTML = `You chose: ${userChoice}`;
+      document.getElementById('computer-choice').innerHTML = `Computer chose: ${computerChoice}`;
+
+      const resultDiv = document.getElementById('result');
+      resultDiv.innerHTML = result;
+      resultDiv.className = result === 'You Won!' ? 'winner' : result === 'You Lost!' ? 'loser' : 'tie';
+      updateScoreboard();
+    }
+
+    function animateWinner(choice) {
+      const element = document.getElementById(choice.toLowerCase() + 'Btn').querySelector('img');
+      element.classList.add('animate-' + choice.toLowerCase());
+      setTimeout(() => element.classList.remove('animate-' + choice.toLowerCase()), 900);
+    }
+
+    function updateScoreboard() {
+      document.getElementById('total').textContent = totalMatches;
+      document.getElementById('wins').textContent = wins;
+      document.getElementById('losses').textContent = losses;
+      document.getElementById('ties').textContent = ties;
+    }
+
+    function resetGame() {
+      totalMatches = wins = losses = ties = 0;
+      updateScoreboard();
+      document.getElementById('result').innerHTML = '';
+      document.getElementById('user-choice').innerHTML = '';
+      document.getElementById('computer-choice').innerHTML = '';
+    }
+  </script>
+</body>
+</html>
